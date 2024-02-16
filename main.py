@@ -10,7 +10,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
-import chromadb
+# import chromadb
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import AIMessage, HumanMessage
 
@@ -73,11 +73,11 @@ def load_chunk_persist_pdf() -> Chroma:
     #     consent_collection = client.create_collection("consent_collection")
     # else:
     #     print("Collection already exists")
-    new_client = chromadb.EphemeralClient()
+    # new_client = chromadb.EphemeralClient()
     vectordb = Chroma.from_documents(
         documents=chunked_documents,
         embedding=OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY),
-        client=new_client,
+        # client=new_client,
         collection_name="openai_collection",
         persist_directory="chroma_db"
         # ids=pdf_ids,
@@ -94,18 +94,18 @@ def contextualized_question(input: dict):
 
 vectorstore = load_chunk_persist_pdf()
 
-    retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k":6})
-    # create the chain for allowing us to chat with the document
+retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k":6})
+# create the chain for allowing us to chat with the document
 
-    rag_chain = (
-        RunnablePassthrough.assign(
-            context=contextualized_question | retriever
-        )
-        | qa_prompt
-        | llm
+rag_chain = (
+    RunnablePassthrough.assign(
+        context=contextualized_question | retriever
     )
+    | qa_prompt
+    | llm
+)
 
-    chat_history = []
+chat_history = []
 
 @app.route('/api/proprietary-assistant', methods = ['POST'])
 def proprietary_assistant():
