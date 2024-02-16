@@ -94,18 +94,18 @@ def contextualized_question(input: dict):
 
 vectorstore = load_chunk_persist_pdf()
 
-    retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k":6})
-    # create the chain for allowing us to chat with the document
+retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k":6})
+# create the chain for allowing us to chat with the document
 
-    rag_chain = (
-        RunnablePassthrough.assign(
-            context=contextualized_question | retriever
-        )
-        | qa_prompt
-        | llm
+rag_chain = (
+    RunnablePassthrough.assign(
+        context=contextualized_question | retriever
     )
+    | qa_prompt
+    | llm
+)
 
-    chat_history = []
+chat_history = []
 
 @app.route('/api/proprietary-assistant', methods = ['POST'])
 def proprietary_assistant():
